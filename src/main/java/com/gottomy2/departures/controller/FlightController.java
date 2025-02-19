@@ -6,6 +6,9 @@ import com.gottomy2.departures.service.FlightService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,10 +21,11 @@ public class FlightController {
     private final FlightService flightService;
 
     @GetMapping
-    public ResponseEntity<Page<Flight>> getFlights(
+    public ResponseEntity<PagedModel<EntityModel<Flight>>> getFlights(
             @RequestParam(required = false) FlightStatus status,
             @RequestParam(required = false) FlightZone zone,
-            Pageable pageable) {
+            Pageable pageable,
+            PagedResourcesAssembler<Flight> pagedAssembler) {
 
         Page<Flight> flights;
 
@@ -35,7 +39,8 @@ public class FlightController {
             flights = flightService.getAllFlights(pageable);
         }
 
-        return ResponseEntity.ok(flights);
+        PagedModel<EntityModel<Flight>> model = pagedAssembler.toModel(flights, flight -> EntityModel.of(flight));
+        return ResponseEntity.ok(model);
     }
 
     @GetMapping("/{id}")
