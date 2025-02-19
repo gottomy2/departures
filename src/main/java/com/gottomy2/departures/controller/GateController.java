@@ -5,6 +5,9 @@ import com.gottomy2.departures.service.GateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,8 +20,14 @@ public class GateController {
     private final GateService gateService;
 
     @GetMapping
-    public ResponseEntity<Page<Gate>> getAllGates(Pageable pageable) {
-        return ResponseEntity.ok(gateService.getAllGates(pageable));
+    public ResponseEntity<PagedModel<EntityModel<Gate>>> getAllGates(
+            Pageable pageable,
+            PagedResourcesAssembler<Gate> pagedAssembler) {
+
+        Page<Gate> gates = gateService.getAllGates(pageable);
+        PagedModel<EntityModel<Gate>> model = pagedAssembler.toModel(gates, gate -> EntityModel.of(gate));
+
+        return ResponseEntity.ok(model);
     }
 
     @GetMapping("/{id}")
