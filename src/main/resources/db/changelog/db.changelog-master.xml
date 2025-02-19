@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="1-create-gates-table" author="gottomy2">
+        <createTable tableName="gates">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="gate_number" type="varchar(10)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2-create-flights-table" author="liquibase">
+        <createTable tableName="flights">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="flight_number" type="varchar(10)"/>
+            <column name="destination" type="varchar(100)"/>
+            <column name="status" type="varchar(20)"/>
+            <column name="departure_time" type="timestamp"/>
+            <column name="zone" type="varchar(20)"/>
+            <column name="gate_id" type="bigint"/>
+            <column name="temperature" type="double"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="3-add-foreign-key" author="liquibase">
+        <addForeignKeyConstraint
+                baseTableName="flights"
+                baseColumnNames="gate_id"
+                referencedTableName="gates"
+                referencedColumnNames="id"
+                constraintName="fk_flights_gates"/>
+    </changeSet>
+
+    <changeSet id="4-create-temporary-flights-table" author="gottomy2">
+        <createTable tableName="flights_temporary">
+            <column name="flight_number" type="varchar(10)"/>
+            <column name="destination" type="varchar(100)"/>
+            <column name="status" type="varchar(20)"/>
+            <column name="departure_time" type="timestamp"/>
+            <column name="zone" type="varchar(20)"/>
+            <column name="gate_number" type="varchar(10)"/>
+            <column name="temperature" type="double"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="5-load-csv-to-temporary" author="gottomy2">
+        <loadData tableName="flights_temporary" file="db/changelog/flight_data.csv" separator="," encoding="UTF-8">
+            <column name="flight_number" type="STRING"/>
+            <column name="destination" type="STRING"/>
+            <column name="status" type="STRING"/>
+            <column name="departure_time" type="TIMESTAMP"/>
+            <column name="zone" type="STRING"/>
+            <column name="gate_number" type="STRING"/>
+            <column name="temperature" type="NUMERIC"/>
+        </loadData>
+    </changeSet>
+
+    <changeSet id="6-insert-unique-gates" author="gottomy2">
+        <sql>
+            INSERT INTO gates (gate_number)
+            SELECT DISTINCT gate_number FROM flights_temporary WHERE gate_number IS NOT NULL;
+        </sql>
+    </changeSet>
+
+    <changeSet id="7-insert-flights-with-gate-mapping" author="gottomy2">
+        <sql>
+            INSERT INTO flights (flight_number, destination, status, departure_time, zone, gate_id, temperature)
+            SELECT
+                flight_number,
+                destination,
+                status,
+                departure_time,
+                zone,
+                (SELECT id FROM gates WHERE gates.gate_number = flights_temporary.gate_number),
+                temperature
+            FROM flights_temporary;
+        </sql>
+    </changeSet>
+
+    <changeSet id="8-drop-temporary-table" author="gottomy2">
+        <dropTable tableName="flights_temporary"/>
+    </changeSet>
+
+</databaseChangeLog>
