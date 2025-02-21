@@ -64,10 +64,16 @@ class FlightControllerTest {
 
     @Test
     void shouldGetAllFlights() throws Exception {
+        Flight testFlight = new Flight();
+        testFlight.setFlightNumber("LO123");
+
         Page<Flight> page = new PageImpl<>(List.of(testFlight), PageRequest.of(0, 10), 1);
-        when(flightService.getAllFlights(any(Pageable.class))).thenReturn(page);
+
+        when(flightService.getFlightsFiltered(any(), any(), any(), any())).thenReturn(page);
 
         mockMvc.perform(get("/api/flights")
+                        .param("page", "0")
+                        .param("size", "10")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.flightList", hasSize(1)))
