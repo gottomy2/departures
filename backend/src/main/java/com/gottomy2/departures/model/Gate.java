@@ -18,5 +18,9 @@ public class Gate {
 
     @Column(name = "gate_number", nullable = false, unique = true)
     private String gateNumber;
+
+    public Gate(String gateNumber) {
+        this.gateNumber = gateNumber;
+    }
 }
 

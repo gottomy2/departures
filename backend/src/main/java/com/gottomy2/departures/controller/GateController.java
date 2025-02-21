@@ -1,5 +1,6 @@
 package com.gottomy2.departures.controller;
 
+import com.gottomy2.departures.model.Flight;
 import com.gottomy2.departures.model.Gate;
 import com.gottomy2.departures.service.GateService;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +46,11 @@ public class GateController {
     @PostMapping
     public ResponseEntity<Gate> createGate(@RequestBody Gate gate) {
         return ResponseEntity.ok(gateService.saveGate(gate));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Gate> updateGate(@PathVariable Long id, @RequestBody Gate updatedGate) {
+        return ResponseEntity.ok(gateService.updateGate(id, updatedGate));
     }
 
     @DeleteMapping("/{id}")

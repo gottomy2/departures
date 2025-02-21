@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,13 +41,15 @@ public class FlightController {
     }
 
     @PostMapping
-    public ResponseEntity<Flight> createFlight(@RequestBody Flight flight) {
-        return ResponseEntity.ok(flightService.saveFlight(flight));
+    public ResponseEntity<Flight> saveFlight(@RequestBody Flight flight) {
+        Flight savedFlight = flightService.saveFlight(flight);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedFlight);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Flight> updateFlight(@PathVariable Long id, @RequestBody Flight updatedFlight) {
-        return ResponseEntity.ok(flightService.updateFlight(id, updatedFlight));
+        Flight savedFlight = flightService.updateFlight(id, updatedFlight);
+        return ResponseEntity.ok(savedFlight);
     }
 
     @DeleteMapping("/{id}")

@@ -35,6 +35,12 @@ public class GateService {
         return gateRepository.save(gate);
     }
 
+    public Gate updateGate(Long id, Gate gate) {
+        Gate existingGate = getGateById(id);
+        existingGate.setGateNumber(gate.getGateNumber());
+        return gateRepository.save(existingGate);
+    }
+
     public void deleteGate(Long id) {
         if (!gateRepository.existsById(id)) {
             throw new RuntimeException("Gate not found with id: " + id);
