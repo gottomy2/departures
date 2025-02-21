@@ -90,4 +90,12 @@
         <dropTable tableName="flights_temporary"/>
     </changeSet>
 
+    <changeSet id="9-add-indexes" author="gottomy2">
+        <sql>
+            CREATE INDEX idx_flight_flight_number ON flightS (flight_number);
+            CREATE INDEX idx_flight_status ON flights (status);
+            CREATE INDEX idx_flight_zone ON flights (zone);
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

@@ -4,9 +4,11 @@ import com.gottomy2.departures.model.Flight;
 import com.gottomy2.departures.model.FlightStatus;
 import com.gottomy2.departures.model.FlightZone;
 import com.gottomy2.departures.repository.FlightRepository;
+import com.gottomy2.specification.FlightSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,21 +23,14 @@ public class FlightService {
         return flightRepository.findAll(pageable);
     }
 
-    public Page<Flight> getFlightsByStatus(FlightStatus status, Pageable pageable) {
-        return flightRepository.findByStatus(status, pageable);
-    }
-
-    public Page<Flight> getFlightsByZone(FlightZone zone, Pageable pageable) {
-        return flightRepository.findByZone(zone, pageable);
-    }
-
-    public Page<Flight> getFlightsByStatusAndZone(FlightStatus status, FlightZone zone, Pageable pageable) {
-        return flightRepository.findByStatusAndZone(status, zone, pageable);
-    }
-
     public Flight getFlightById(Long id) {
         return flightRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Flight not found with id: " + id));
+    }
+
+    public Page<Flight> getFlightsFiltered(String flightNumber, FlightStatus status, FlightZone zone, Pageable pageable) {
+        Specification<Flight> spec = FlightSpecification.filterFlights(flightNumber, status, zone);
+        return flightRepository.findAll(spec, pageable);
     }
 
     public Flight saveFlight(Flight flight) {

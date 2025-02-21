@@ -22,22 +22,13 @@ public class FlightController {
 
     @GetMapping
     public ResponseEntity<PagedModel<EntityModel<Flight>>> getFlights(
+            @RequestParam(required = false) String flightNumber,
             @RequestParam(required = false) FlightStatus status,
             @RequestParam(required = false) FlightZone zone,
             Pageable pageable,
             PagedResourcesAssembler<Flight> pagedAssembler) {
 
-        Page<Flight> flights;
-
-        if (status != null && zone != null) {
-            flights = flightService.getFlightsByStatusAndZone(status, zone, pageable);
-        } else if (status != null) {
-            flights = flightService.getFlightsByStatus(status, pageable);
-        } else if (zone != null) {
-            flights = flightService.getFlightsByZone(zone, pageable);
-        } else {
-            flights = flightService.getAllFlights(pageable);
-        }
+        Page<Flight> flights = flightService.getFlightsFiltered(flightNumber, status, zone, pageable);
 
         PagedModel<EntityModel<Flight>> model = pagedAssembler.toModel(flights, flight -> EntityModel.of(flight));
         return ResponseEntity.ok(model);
