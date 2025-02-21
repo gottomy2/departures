@@ -153,7 +153,7 @@ const FlightModal: React.FC<{ flight: Flight | null; mode: "add" | "edit" | "del
                         </div>
 
                         <div className="flex justify-between mt-4">
-                            <button onClick={handleSubmit} className="bg-blue-500 text-white px-4 py-2 rounded" disabled={loading}>
+                            <button onClick={handleSubmit} className="bg-gray-500 text-white px-4 py-2 rounded" disabled={loading}>
                                 {loading ? "Zapisywanie..." : mode === "add" ? "Dodaj" : "Zapisz"}
                             </button>
                             <button onClick={onClose} className="bg-gray-300 px-4 py-2 rounded">Anuluj</button>
