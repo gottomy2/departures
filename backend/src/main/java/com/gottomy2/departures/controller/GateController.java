@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/gates")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*") // Pozwala na dostęp do API z frontendu
 public class GateController {
 
     private final GateService gateService;
