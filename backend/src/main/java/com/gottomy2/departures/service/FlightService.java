@@ -14,7 +14,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +25,7 @@ public class FlightService {
 
     private final FlightRepository flightRepository;
     private final GateRepository gateRepository;
+    private final WeatherService weatherService;
 
     public Page<Flight> getAllFlights(Pageable pageable) {
         return flightRepository.findAll(pageable);
@@ -33,9 +36,32 @@ public class FlightService {
                 .orElseThrow(() -> new RuntimeException("Flight not found with id: " + id));
     }
 
+    private final Map<String, Double> weatherCache = new HashMap<>();
+
     public Page<Flight> getFlightsFiltered(String flightNumber, FlightStatus status, FlightZone zone, Pageable pageable) {
         Specification<Flight> spec = FlightSpecification.filterFlights(flightNumber, status, zone);
-        return flightRepository.findAll(spec, pageable);
+        Page<Flight> flights = flightRepository.findAll(spec, pageable);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        flights.forEach(flight -> {
+            String city = flight.getDestination();
+            String departureDate = flight.getDepartureTime().toLocalDate().format(formatter);
+
+            String cacheKey = city + "-" + departureDate;
+
+            if (weatherCache.containsKey(cacheKey)) {
+                flight.setTemperature(weatherCache.get(cacheKey));
+            } else {
+                Double temperature = weatherService.getTemperature(city, departureDate);
+                if (temperature != null) {
+                    weatherCache.put(cacheKey, temperature);
+                    flight.setTemperature(temperature);
+                }
+            }
+        });
+
+        return flights;
     }
 
     public Flight saveFlight(Flight flight) {

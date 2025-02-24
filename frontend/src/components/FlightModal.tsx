@@ -31,7 +31,12 @@ const FlightModal: React.FC<{
 
     useEffect(() => {
         if (flight) {
-            setFormData(flight);
+            const departureDate = new Date(flight.departureTime);
+            const localDate = new Date(departureDate.getTime() - departureDate.getTimezoneOffset() * 60000);
+            setFormData({
+                ...flight,
+                departureTime: localDate.toISOString().slice(0, 16), // Konwersja na format "YYYY-MM-DDTHH:MM"
+            });
             setGateInput(flight.gate?.gateNumber || "");
         }
     }, [flight]);
@@ -44,18 +49,25 @@ const FlightModal: React.FC<{
     const token = localStorage.getItem("jwt");
 
     const handleSubmit = async () => {
-        const updatedFlight = { ...formData, gate: gateInput ? { gateNumber: gateInput } : null };
+        const departureDate = new Date(formData.departureTime);
+        const utcDate = new Date(departureDate.getTime() + departureDate.getTimezoneOffset() * 60000);
+
+        const updatedFlight = {
+            ...formData,
+            departureTime: utcDate.toISOString(), // Wysyłamy poprawny format UTC
+            gate: gateInput ? { gateNumber: gateInput } : null,
+        };
 
         const method = mode === "edit" ? "PUT" : "POST";
         const url = mode === "edit"
             ? `http://localhost:8080/api/flights/${flight?.id}`
-            : "http://localhost:8080/api/flights";
+            : `http://localhost:8080/api/flights`;
 
         const response = await fetch(url, {
             method,
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
+                "Authorization": `Bearer ${token}`,
             },
             body: JSON.stringify(updatedFlight),
         });
@@ -136,10 +148,9 @@ const FlightModal: React.FC<{
                             </select>
 
                             <input
-                                type="text"
+                                type="datetime-local"
                                 name="departureTime"
-                                placeholder="Godzina odlotu"
-                                value={formData.departureTime}
+                                value={formData.departureTime ? new Date(formData.departureTime).toISOString().slice(0, 16) : ""}
                                 onChange={handleChange}
                                 className="border p-2 rounded"
                             />
