@@ -98,4 +98,11 @@
         </sql>
     </changeSet>
 
+    <changeSet id="10-insert-default-admin" author="gottomy2">
+        <insert tableName="users">
+            <column name="username" value="admin"/>
+            <column name="password" value="$2a$10$PoAU3rjM730fZVoModWeH.yztuF/JPPNJ41pr5Srwd1aFq4Q.w83K"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

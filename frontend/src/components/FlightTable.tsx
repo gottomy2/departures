@@ -57,6 +57,8 @@ const FlightTable: React.FC = () => {
     const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
     const [modalMode, setModalMode] = useState<"add" | "edit" | "delete">("add");
 
+    const token = localStorage.getItem("jwt");
+
     useEffect(() => {
         setCurrentPage(0);
     }, [zoneFilter, statusFilter]);
@@ -157,12 +159,14 @@ const FlightTable: React.FC = () => {
                         </select>
                     </div>
 
-                    <button
-                        onClick={() => openModal(null, "add")}
-                        className="px-4 py-2 bg-gray-500 text-white rounded flex items-center"
-                    >
-                        <FaPlus className="mr-2"/> Dodaj lot
-                    </button>
+                    {token && (
+                        <button
+                            onClick={() => openModal(null, "add")}
+                            className="px-4 py-2 bg-gray-500 text-white rounded flex items-center"
+                        >
+                            <FaPlus className="mr-2" /> Dodaj lot
+                        </button>
+                    )}
                 </div>
                 <table className="w-auto border-collapse shadow-lg bg-white">
                     <thead className="border-b">
@@ -174,7 +178,7 @@ const FlightTable: React.FC = () => {
                         <th className="p-4 text-left text-center">Strefa</th>
                         <th className="p-4 text-left text-center">Bramka</th>
                         <th className="p-4 text-left text-center">Temperatura</th>
-                        <th className="p-4 text-left text-center">Akcja</th>
+                        {token && <th className="p-4 text-left text-center">Akcja</th>}
                     </tr>
                     </thead>
                     <tbody>
@@ -205,14 +209,16 @@ const FlightTable: React.FC = () => {
                                     </div>
                                 </td>
                                 <td className="p-4 flex space-x-2">
-                                    <button onClick={() => openModal(flight, "edit")}
-                                            className="px-2 py-1 rounded">
-                                        <FaEdit/>
-                                    </button>
-                                    <button onClick={() => openModal(flight, "delete")}
-                                            className="px-2 py-1 rounded">
-                                        <FaTrash/>
-                                    </button>
+                                    {token && (
+                                        <>
+                                            <button onClick={() => openModal(flight, "edit")} className="px-2 py-1 rounded">
+                                                <FaEdit />
+                                            </button>
+                                            <button onClick={() => openModal(flight, "delete")} className="px-2 py-1 rounded">
+                                                <FaTrash />
+                                            </button>
+                                        </>
+                                    )}
                                 </td>
                             </tr>
                         )))}

@@ -14,9 +14,7 @@ const App: React.FC = () => {
 
                 <div className="relative z-10 container mx-auto p-6 flex-grow">
                     <Routes>
-                        <Route path="/"
-                               element={<h1 className="text-center text-3xl font-semibold">Strona główna</h1>}/>
-                        <Route path="/flights" element={<FlightTable/>}/>
+                        <Route path="/" element={<FlightTable/>}/>
                         <Route path="/gates" element={<h1 className="text-center text-2xl">Sekcja bramek</h1>}/>
                     </Routes>
                 </div>

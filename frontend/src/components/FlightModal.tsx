@@ -41,8 +41,10 @@ const FlightModal: React.FC<{
         setFormData((prev) => ({...prev, [name]: value}));
     };
 
+    const token = localStorage.getItem("jwt");
+
     const handleSubmit = async () => {
-        const updatedFlight = {...formData, gate: gateInput ? {gateNumber: gateInput} : null};
+        const updatedFlight = { ...formData, gate: gateInput ? { gateNumber: gateInput } : null };
 
         const method = mode === "edit" ? "PUT" : "POST";
         const url = mode === "edit"
@@ -51,7 +53,10 @@ const FlightModal: React.FC<{
 
         const response = await fetch(url, {
             method,
-            headers: {"Content-Type": "application/json"},
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
             body: JSON.stringify(updatedFlight),
         });
 
@@ -68,6 +73,9 @@ const FlightModal: React.FC<{
 
         const response = await fetch(`http://localhost:8080/api/flights/${flight.id}`, {
             method: "DELETE",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
         });
 
         if (response.ok) {
