@@ -11,7 +11,7 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private final String SECRET_KEY = "superSecretKeySuperSecretKeySuperSecretKey"; // Użyj ENV w produkcji
+    private final String SECRET_KEY = "superSecretKeySuperSecretKeySuperSecretKey";
     private final long EXPIRATION_TIME = 1000 * 60 * 60; // 1 godzina
 
     private final Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());

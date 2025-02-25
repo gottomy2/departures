@@ -1,9 +1,9 @@
 package com.gottomy2.departures.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gottomy2.departures.model.Flight;
-import com.gottomy2.departures.model.FlightStatus;
-import com.gottomy2.departures.model.FlightZone;
+import com.gottomy2.departures.model.*;
+import com.gottomy2.departures.repository.UserRepository;
+import com.gottomy2.departures.security.JwtUtil;
 import com.gottomy2.departures.service.FlightService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,13 +16,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
@@ -42,16 +44,30 @@ class FlightControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
-    private FlightService flightService;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Autowired
     private ObjectMapper objectMapper;
 
+    @MockBean
+    private FlightService flightService;
+
+    @MockBean
+    private UserRepository userRepository;
+
     private Flight testFlight;
+
+    private User user;
+
+    private Gate gate;
+
+    private String token;
 
     @BeforeEach
     void setUp() {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
         testFlight = Flight.builder()
                 .flightNumber("LO123")
                 .destination("Warszawa")
@@ -59,7 +75,24 @@ class FlightControllerTest {
                 .departureTime(LocalDateTime.now().plusHours(2))
                 .zone(FlightZone.SCHENGEN)
                 .temperature(15.5)
+                .gate(new Gate(500L, "G1238"))
                 .build();
+
+        user = User.builder()
+                .username("test")
+                .password(encoder.encode("test"))
+                .build();
+
+        // Mocking repository to return user:
+        when(userRepository.findByUsername("test")).thenReturn(Optional.of(user));
+
+        token = "Bearer " + jwtUtil.generateToken(
+                new org.springframework.security.core.userdetails.User(
+                        user.getUsername(),
+                        user.getPassword(),
+                        List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))
+                )
+        );
     }
 
     @Test
@@ -85,7 +118,8 @@ class FlightControllerTest {
         when(flightService.getFlightById(1L)).thenReturn(testFlight);
 
         mockMvc.perform(get("/api/flights/1")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.flightNumber").value("LO123"));
     }
@@ -96,8 +130,9 @@ class FlightControllerTest {
 
         mockMvc.perform(post("/api/flights")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(testFlight)))
-                .andExpect(status().isOk())
+                        .content(objectMapper.writeValueAsString(testFlight))
+                        .header("Authorization", token))
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.flightNumber").value("LO123"));
     }
 
@@ -107,7 +142,8 @@ class FlightControllerTest {
 
         mockMvc.perform(put("/api/flights/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(testFlight)))
+                        .content(objectMapper.writeValueAsString(testFlight))
+                        .header("Authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.flightNumber").value("LO123"));
     }
@@ -116,7 +152,8 @@ class FlightControllerTest {
     void shouldDeleteFlight() throws Exception {
         doNothing().when(flightService).deleteFlight(1L);
 
-        mockMvc.perform(delete("/api/flights/1"))
+        mockMvc.perform(delete("/api/flights/1")
+                        .header("Authorization", token))
                 .andExpect(status().isNoContent());
     }
 }

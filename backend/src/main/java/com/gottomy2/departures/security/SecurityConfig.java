@@ -36,6 +36,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/login").permitAll()
                         .requestMatchers("/api/flights").permitAll()
                         .requestMatchers("/api/flights/**").authenticated()
+                        .requestMatchers("/api/gates/").authenticated()
+                        .requestMatchers("/api/gates/**").authenticated()
                 )
                 .userDetailsService(userDetailsService)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
