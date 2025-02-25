@@ -19,9 +19,9 @@ interface Flight {
     id: number;
     flightNumber: string;
     destination: string;
-    status: string;
+    status: "PLANOWANY" | "ODPRAWA" | "OPÓŹNIONY" | "ODWOŁANY";
     departureTime: string;
-    zone: string;
+    zone: "SCHENGEN" | "NON_SCHENGEN";
     gate: { gateNumber: string } | null;
     temperature: number;
 }
@@ -164,7 +164,7 @@ const FlightTable: React.FC = () => {
                             onClick={() => openModal(null, "add")}
                             className="px-4 py-2 bg-gray-500 text-white rounded flex items-center"
                         >
-                            <FaPlus className="mr-2" /> Dodaj lot
+                            <FaPlus className="mr-2"/> Dodaj lot
                         </button>
                     )}
                 </div>
@@ -199,7 +199,7 @@ const FlightTable: React.FC = () => {
                                         {statusIcons[flight.status] || null} {flight.status}
                                     </div>
                                 </td>
-                                <td className="p-4">{new Date(flight.departureTime).toLocaleString()}</td>
+                                <td className="p-4">{flight.departureTime ? new Date(flight.departureTime).toLocaleString() : "Brak daty"}</td>
                                 <td className="p-4">{flight.zone}</td>
                                 <td className="p-4">{flight.gate?.gateNumber || "—"}</td>
                                 <td className="p-4">
@@ -211,11 +211,13 @@ const FlightTable: React.FC = () => {
                                 <td className="p-4 flex space-x-2">
                                     {token && (
                                         <>
-                                            <button onClick={() => openModal(flight, "edit")} className="px-2 py-1 rounded">
-                                                <FaEdit />
+                                            <button onClick={() => openModal(flight, "edit")}
+                                                    className="px-2 py-1 rounded">
+                                                <FaEdit/>
                                             </button>
-                                            <button onClick={() => openModal(flight, "delete")} className="px-2 py-1 rounded">
-                                                <FaTrash />
+                                            <button onClick={() => openModal(flight, "delete")}
+                                                    className="px-2 py-1 rounded">
+                                                <FaTrash/>
                                             </button>
                                         </>
                                     )}

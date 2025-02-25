@@ -2,6 +2,7 @@ import React, {useState} from "react";
 
 interface LoginProps {
     onLogin: () => void;
+    onClose: () => void;
 }
 
 const LoginModal: React.FC<LoginProps> = ({onLogin, onClose}) => {
