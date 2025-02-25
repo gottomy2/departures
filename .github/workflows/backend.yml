@@ -32,4 +32,4 @@ jobs:
       - name: Run tests
         run: |
           cd backend
-          mvn test
+          mvn test -Dspring.profiles.active=test
